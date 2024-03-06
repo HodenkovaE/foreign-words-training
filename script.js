@@ -1,3 +1,5 @@
+'use strict'
+
 const words = [
   { word: 'apple', translation: 'яблоко', example: 'Apple is low in calories' },
   { word: 'chiken', translation: 'курица', example: 'Chicken is a bird that is one of the most popular pets in the world' },
@@ -25,20 +27,26 @@ const shuffleWords = document.querySelector('#shuffle-words')
 const time = document.querySelector('#time')
 const correctPercent = document.querySelector('#correct-percent')
 const examProgress = document.querySelector('#exam-progress')
-const results = document.querySelector('.results-modal')
 
 let current = document.querySelector('#current-word')
 
 cardFont.textContent = words[0].word
 cardBack.textContent = words[0].translation
 cardBackExample.textContent = words[0].example
-
 current.textContent = 1
 
 const slideCount = words.length;
 let slideIndex = 0;
 buttonBack.addEventListener('click', showPreviousSlide);
 buttonNext.addEventListener('click', showNextSlide);
+
+shuffleWords.addEventListener('click', function () {
+  words.sort(()=>Math.random()-0.5)
+  cardFont.textContent = words[slideIndex].word
+  cardBack.textContent = words[slideIndex].translation
+  cardBackExample.textContent = words[slideIndex].example
+});
+
 
 function showNextSlide() {
   slideIndex = (slideIndex + 1) % slideCount;
@@ -64,7 +72,6 @@ function showPreviousSlide() {
   cardBackExample.textContent = words[slideIndex].example
   wordsProgress.value = wordsProgress.value - 25
 
-
   if (current.textContent < 5) {
     buttonNext.disabled = false
   }
@@ -73,6 +80,7 @@ function showPreviousSlide() {
   }
 }
 
+
 function format(val) {
   if (val < 10) {
     return `0${val}`
@@ -80,9 +88,18 @@ function format(val) {
   return val;
 }
 
-sec = 0
-min = 0
+let sec = 0
+let min = 0
 time.textContent = `${format(min)}:${format(sec)}`
+
+
+
+function makeExamCard(key) {
+  const item = document.createElement("span");
+  item.classList.add('card');
+  item.textContent = key;
+  examCards.append(item)
+};
 
 
 buttonExam.addEventListener('click', function () {
@@ -104,17 +121,9 @@ buttonExam.addEventListener('click', function () {
 
   }, 1000)
 
-
   words.forEach((tag) => {
-    const element = document.createElement("span");
-    const element1 = document.createElement("span");
-
-    element.textContent = tag.word;
-    element1.textContent = tag.translation;
-    element.classList.add("card");
-    element1.classList.add("card");
-    examCards.append(element);
-    examCards.append(element1);
+    makeExamCard(tag.word)
+    makeExamCard(tag.translation)
   });
 
   const divs = examCards.children;
@@ -127,7 +136,7 @@ buttonExam.addEventListener('click', function () {
 
 
 let element = null
-let click = null
+let firstClick = null
 let word = 0
 correctPercent.textContent = `${word}%`
 
@@ -136,12 +145,12 @@ examCards.addEventListener('click', function (event) {
     const currentCard = event.target;
 
     if (element) {
-      let click2 = words.find((item) => {
+      const secondClick = words.find((item) => {
         if (item.word === currentCard.textContent || item.translation === currentCard.textContent) {
           return true;
         }
       })
-      if (click === click2) {
+      if (firstClick === secondClick) {
         currentCard.classList.add('correct')
         element.classList.add('fade-out')
         element = null;
@@ -151,7 +160,7 @@ examCards.addEventListener('click', function (event) {
         correctPercent.textContent = `${word}%`
       }
 
-      if (click != click2) {
+      if (firstClick !== secondClick) {
         currentCard.classList.add('wrong')
         function deleteSelection() {
           element.classList.remove('correct')
@@ -161,7 +170,7 @@ examCards.addEventListener('click', function (event) {
         setTimeout(deleteSelection, 500);
       }
 
-      if(correctPercent.textContent=='100%') {
+      if(correctPercent.textContent==='100%') {
         function showNotification() {
           alert('Вы успешно прошли тестирование')
         }
@@ -175,7 +184,7 @@ examCards.addEventListener('click', function (event) {
       currentCard.classList.add('correct')
       element = currentCard;
 
-      click = words.find((item) => {
+      firstClick = words.find((item) => {
         if (item.word === currentCard.textContent || item.translation === currentCard.textContent) {
           return true;
         }
@@ -184,30 +193,6 @@ examCards.addEventListener('click', function (event) {
 
   }
 })
-
-
-
-
-shuffleWords.addEventListener('click', function () {
-
-})
- //не понимаю, как перемешивать карточки случайным образом, пробывала разными способам. пыталась найти в интернете, 
- //как поменять массив объектов местами, но такого не нашла. Так же новый пыталась создать массив и рандоировать уникальные числа, и подставляла их/
-
-
-
-
-
-
-
-const template = document.querySelector('#word-stats')
-function myCard(word, attemps) {
-  const myCard = template.content.clonNode(true);
-  myCard.querySelector('.word').textContent = word
-  myCard.querySelector('.attemps').textContent = attemps
-  return myCard
-}
- //////не понимаю как с помощью template вставить статистику///
 
 
 
